@@ -18,6 +18,11 @@ Event OnArousalComputed(string eventName, string argString, float argNum, form s
 	self.ReSpell()
 EndEvent
 
+Event OnCellLoad()
+	Utility.Wait(5)
+	self.ReSpell()
+EndEvent
+
 Function ReSpell()
 	Actor selfact = self.GetActorRef()
 	int arousal = selfact.GetFactionRank(sla_Arousal)
