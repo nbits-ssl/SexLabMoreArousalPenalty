@@ -1,33 +1,43 @@
 Scriptname MoreArousalPenalty extends ReferenceAlias  
 
 Event OnInit()
-	Actor selfact = self.GetActorRef()
-	SexLab.TrackActor(selfact, "MyTracking")
-	
-	RegisterForModevent("MyTracking_End", "SexLabMapSexEnd")
-	RegisterForModevent("sla_UpdateComplete", "OnArousalComputed")
-	
+	self.RegisterSSLMAP()
 EndEvent
 
-Event SexLabMapSexEnd(Form FormRef, int tid)
-	Utility.Wait(5)
-	self.ReSpell()
+Event OnPlayerLoadGame()  ; dirty hack
+	self.RegisterSSLMAP()
+EndEvent
+
+Function RegisterSSLMAP()
+	RegisterForModEvent("HookOrgasmEnd", "SexLabMapSexEnd")
+	RegisterForModevent("sla_UpdateComplete", "OnArousalComputed")
+EndFunction
+	
+Event SexLabMapSexEnd(int tid, bool hasPlayer)
+	if (hasPlayer)
+		Utility.Wait(3.0)
+		debug.trace("[SSLMAP] OnSexEnd Computed Arousal")
+		self.ReSpell()
+	endif
 EndEvent
 
 Event OnArousalComputed(string eventName, string argString, float argNum, form sender)
+	Utility.Wait(2.0)
+	debug.trace("[SSLMAP] OnArousalComputed Computed Arousal")
 	self.ReSpell()
 EndEvent
 
 Event OnCellLoad()
-	Utility.Wait(5)
+	Utility.Wait(3.0)
+	debug.trace("[SSLMAP] OnCellLoad Computed Arousal")
 	self.ReSpell()
 EndEvent
 
 Function ReSpell()
 	Actor selfact = self.GetActorRef()
 	int arousal = selfact.GetFactionRank(sla_Arousal)
+	debug.trace("[SSLMAP] Arousal is " + arousal)
 	
-	debug.trace("[SSLMAP] Computed Arousal " + arousal)
 	if (arousal < SSLMAP50.GetValue())
 		self.dispellif(selfact, SSLMap50Magic)
 		self.dispellif(selfact, SSLMap70Magic)
